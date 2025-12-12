@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Data Matching: What Actually Breaks | Jamie Allen</title>
+<meta name="keywords" content="">
+<meta name="description" content="I thought I’d do something different this week and talk about data. Not just data in general, but what I’ve been doing for the last few months on a project.
+Without going into detail on the where and why, the problem that I’ve been working on for the last few months is neatly defined by one phrase - Data Matching. Data Matching is the process whereby records from different sources are matched using various characteristics to attempt to identify a single view of an individual. It’s extensively used in the retail world between sales data, clickstream data from websites, google search data and data from social media, and potentially other sources. And yes - this is why when you googled walking shoes, you all of a sudden got a rush of content popping up about that very thing, and why the shoe store you bought the previous pair from 9 months ago all of a sudden emailed you saying they had a special deal for you on that very shoe. (True story - Under Armour in the US owned the MyFitnessPal app platform until 2020. Using data from their product testing, sales history and the fitness tracking app they would calculate the approximate time that someone would be looking for a new pair of running shoes, then email them a special one off voucher for a replacement for the shoes they currently owned.)">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/data-matching/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/data-matching/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Jamie Allen (Alt + H)">Jamie Allen</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Data Matching: What Actually Breaks
+    </h1>
+    <div class="post-meta"><span title='2025-12-12 00:00:00 +0000 UTC'>December 12, 2025</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>I thought I’d do something different this week and talk about data. Not just data in general, but what I’ve been doing for the last few months on a project.</p>
+<p>Without going into detail on the where and why, the problem that I’ve been working on for the last few months is neatly defined by one phrase - Data Matching. Data Matching is the process whereby records from different sources are matched using various characteristics to attempt to identify a single view of an individual. It’s extensively used in the retail world between sales data, clickstream data from websites, google search data and data from social media, and potentially other sources. And yes - this is why when you googled walking shoes, you all of a sudden got a rush of content popping up about that very thing, and why the shoe store you bought the previous pair from 9 months ago all of a sudden emailed you saying they had a special deal for you on that very shoe. (True story - Under Armour in the US owned the MyFitnessPal app platform until 2020. Using data from their product testing, sales history and the fitness tracking app they would calculate the approximate time that someone would be looking for a new pair of running shoes, then email them a special one off voucher for a replacement for the shoes they currently owned.)</p>
+<p>This article isn’t about the good or the bad, why or exactly the how, but the basic process behind how you make all that data from all those different sources into something that looks like a cohesive set of records that you can work with.</p>
+<p>Let’s start with the raw source data. You might think that joining records on people’s names would be simple. You would be wrong.</p>
+<p>Assume the name on your license is Jonathon Matthew Francis Jones and you live at 967 Somewhere Street, Sometown. You live at home with your partner, and your mum Francine and father John live in a granny flat out the back. As both you and your father are named a variant of John (a name passed down from father to eldest son for generations), you’ve gone by the name Matt since you were born.</p>
+<p>How many problems can you see with the paragraph above? I’ll give you a second. A few more seconds. OK - times up.</p>
+<p>I had a nervous breakdown writing it out and purposefully put in at least 10 possible issues in that paragraph. Let’s just think about Matt for a second. He goes to a shop to buy something and puts in a name to sign up for a card. The person behind the counter types in Matt Jones. The next shop asks “Is it just Matt or Matthew?” and they put down Matthew. The next place he lands couldn’t care as they are going on a break so they just write M. Jones. Somewhere else asks for id, but they type in Johnathon and his middle names. The next one gets Jonathon right, but only has a field for one middle name, so he gets “Jonathon Matthew Jones”. So does the next one, but they tack his second middle name onto his last name in the system so he’s now Francis Jones. We already have 6 different variations plus his actual name. Add in a few random spelling mistakes and we have nothing we can safely join together using an equals sign. And I’ve seen all of these variations of things in the one source system!</p>
+<p>The traditional answer to this lies in a mix of deterministic (think rules and groups and actual id’s that are equal) and fuzzy (we’ve seen these things before and think they’re the same) matching. For example Johnathon and Jonathon are not equivalent deterministically, but are closely related enough that they might be the same thing. Why do you mix and match between fuzzy and deterministic I hear you ask? If I just used fuzzy matching on their names and addresses, Matt and his father would be a direct match. But if we included a deterministic match (=) on the date of birth (if we had it) we can safely say they are two different people, or that they are not the same person. There’s a very clear distinction between the two, but that’s a different topic.</p>
+<p>Tools like the Open Source library Splink that came out of the Ministry of Justice in the UK, and tools like SAP HANA Smart Data Quality or Informatica’s MDM Hub (to name but a couple) use the process described above to match data using a configured set of rules using both exact and fuzzy matching and a library of known “matches” that can be used to calculate a set of match candidates in the data.</p>
+<p>In the realm of AI and ML, libraries like Zingg (<a href="https://www.zingg.ai/">https://www.zingg.ai/</a>) do a pretty good job out of the box, and get much better when you spend a little time and train them with positive and negative matches. In essence, the AI looks at the data and based on data it’s seen before, says, yay, nay or maybe for each record.</p>
+<p>So how do we know that what we’ve done is correct? Well, we don’t for certain. We can only provide the information that’s been generated, calculate a possibility value for the match, and pass it on. If your business is selling tickets in an art union, you might not care that the person you’re ringing is the same person who bought tickets last month, or a person with the same name whom you have no relationship with. On the flipside of that, if you’re going to try and potentially prosecute someone for fraud for claiming something they weren’t entitled to, you might want to be pretty certain that you’ve got the data right.</p>
+<p>Calculating that possibility value can be done in a variety of ways. We could count up the number of matched records (I found this person I’m pretty certain is right in 3 other systems - so it must be them) or we could look at each matched pair of data and calculate the similarity of the values using something like Levenshtein’s distance or the Jaro-Winkler distance for strings or a sliding set of rules for dates. Either of these could be correct but it will depend on the business requirement and the purpose of the data matching. If you want to prove this is the right person for example, a count of matches may be what you need. If you want to find potential candidates for someone, then the second method may suit better.</p>
+<p>What have we got so far? We have a set of data that we have cleaned, normalised and canonised so the match process won’t laugh at us. We’ve run the match process and have sets of records that match the rules we’ve specified. And we have a numeric value that implies a degree of similarity highlighting more precise matches.</p>
+<p>The only way to understand the efficiency of a process is to measure it. How do we do this? One of the ways is to look at the match rate. The match rate is the number of records matched divided by the number of the records input and multiplied by 100 to give us a percentage. Is higher better? Sometimes yes - sometimes no.</p>
+<p>Pretend I’m working on a dataset that is matching patient records from Hospital B to Hospital A when the 2 hospitals are physically close together and patients could go to either one, depending on a range of factors. Say I have 100,000 records from both hospitals. An initial analysis of the data, and the accepted advice from staff suggests a 40% overlap where patients have been seen at both hospitals. I do all the things, and at the end I get a 38% match rate. Sounds great, until we look at the data and come up with 20% of the matched records are false positives because someone tweaked the dial too far left. That could mean that little Johnny’s that came in with chest pain after falling out of the tree is suddenly given the medication for grandad&rsquo;s angina. Sounds great for the CDO, not so great for the Chief Medical Officer.</p>
+<p>What we really wanted here was precision. Precision is what makes the CDO look like they stepped in something and in our little case study, the CMO to be less worried that his data may be wrong. Precision is that little measure that says “of what we said were matches, how many of them were actually correct. In our example above, the match rate was 38%, but the precision was about 60% (or less).</p>
+<p>There’s a bunch of other metrics we could look at, but we won’t. Things like False Positive Rates, False Negative Rates and Cluster Size Distributions all have a place for what they are good at and what they do, but getting into them could well be writing a whole separate article.</p>
+<p>Suffice to say, choose the metric or metrics that tell the story you need them to tell, and that matches the business case.</p>
+<p>After all that, we’ve actually created something useful. We’ve given our team data that they’ve never had before, or data that might lead to new sales, or data that allows us to merge two systems. We’ve made sure our data is looking the best it can, and potentially got some data that we didn’t have earlier, and we’ve grouped it together like good little datasets all lined up and ready for class. We’ve calculated the metrics that tell the right story, and all that’s left is to grab another coffee and find the next jira ticket to work on.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">Jamie Allen</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

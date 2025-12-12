@@ -1,0 +1,4 @@
+baseURL = 'https://jamieallen.github.io/'
+languageCode = 'en-au'
+title = 'Jamie Allen'
+theme = "PaperMod"

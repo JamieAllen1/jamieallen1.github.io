@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts on Jamie Allen</title>
+    <link>http://localhost:1313/posts/</link>
+    <description>Recent content in Posts on Jamie Allen</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>en-au</language>
+    <lastBuildDate>Fri, 12 Dec 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Data Matching: What Actually Breaks</title>
+      <link>http://localhost:1313/posts/data-matching/</link>
+      <pubDate>Fri, 12 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/data-matching/</guid>
+      <description>&lt;p&gt;I thought I’d do something different this week and talk about data. Not just data in general, but what I’ve been doing for the last few months on a project.&lt;/p&gt;
+&lt;p&gt;Without going into detail on the where and why, the problem that I’ve been working on for the last few months is neatly defined by one phrase - Data Matching. Data Matching is the process whereby records from different sources are matched using various characteristics to attempt to identify a single view of an individual. It’s extensively used in the retail world between sales data, clickstream data from websites, google search data and data from social media, and potentially other sources. And yes - this is why when you googled walking shoes, you all of a sudden got a rush of content popping up about that very thing, and why the shoe store you bought the previous pair from 9 months ago all of a sudden emailed you saying they had a special deal for you on that very shoe. (True story - Under Armour in the US owned the MyFitnessPal app platform until 2020. Using data from their product testing, sales history and the fitness tracking app they would calculate the approximate time that someone would be looking for a new pair of running shoes, then email them a special one off voucher for a replacement for the shoes they currently owned.)&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
