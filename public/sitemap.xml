@@ -2,14 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://localhost:1313/</loc>
+    <lastmod>2026-01-27T12:50:16+10:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2026-01-27T12:50:16+10:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/posts/data-matching/</loc>
     <lastmod>2025-12-12T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2025-12-12T00:00:00+00:00</lastmod>
+    <loc>http://localhost:1313/posts/stop-letting-a-toaster-write-your-cv/</loc>
+    <lastmod>2025-12-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2025-12-12T00:00:00+00:00</lastmod>
+    <loc>http://localhost:1313/posts/when-you-dont-want-a-cover-letter-that-sounds-like-a-ted-talk-from-a-toaster/</loc>
+    <lastmod>2025-11-21T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/5-months-100-job-applications-and-a-crash-course-in-ai/</loc>
+    <lastmod>2025-11-04T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/</loc>
   </url><url>

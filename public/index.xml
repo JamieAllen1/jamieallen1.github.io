@@ -16,5 +16,36 @@
       <description>&lt;p&gt;I thought I’d do something different this week and talk about data. Not just data in general, but what I’ve been doing for the last few months on a project.&lt;/p&gt;
 &lt;p&gt;Without going into detail on the where and why, the problem that I’ve been working on for the last few months is neatly defined by one phrase - Data Matching. Data Matching is the process whereby records from different sources are matched using various characteristics to attempt to identify a single view of an individual. It’s extensively used in the retail world between sales data, clickstream data from websites, google search data and data from social media, and potentially other sources. And yes - this is why when you googled walking shoes, you all of a sudden got a rush of content popping up about that very thing, and why the shoe store you bought the previous pair from 9 months ago all of a sudden emailed you saying they had a special deal for you on that very shoe. (True story - Under Armour in the US owned the MyFitnessPal app platform until 2020. Using data from their product testing, sales history and the fitness tracking app they would calculate the approximate time that someone would be looking for a new pair of running shoes, then email them a special one off voucher for a replacement for the shoes they currently owned.)&lt;/p&gt;</description>
     </item>
+    <item>
+      <title>Stop Letting a Toaster Write Your CV</title>
+      <link>http://localhost:1313/posts/stop-letting-a-toaster-write-your-cv/</link>
+      <pubDate>Fri, 05 Dec 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/stop-letting-a-toaster-write-your-cv/</guid>
+      <description>&lt;p&gt;&lt;em&gt;Originally published on LinkedIn in December 2025. Republished here for completeness.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;We’ve all been there. It’s that time again where you head out on the job search and need to update your CV. You open the last one, click File -&amp;gt; Save As, then go down to the summary and start shoving in the latest brain dump of your most recent role.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;STOP RIGHT THERE!&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Last time I talked about not having a toaster give a TED Talk on your behalf. Today I’m going to show you how to use AI, or more precisely, an LLM, to help you dig out some extra gems to add to your CV. Now we make the toaster do some work.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>When You Don&#39;t Want a Cover Letter That Sounds Like a Ted Talk From a Toaster</title>
+      <link>http://localhost:1313/posts/when-you-dont-want-a-cover-letter-that-sounds-like-a-ted-talk-from-a-toaster/</link>
+      <pubDate>Fri, 21 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/when-you-dont-want-a-cover-letter-that-sounds-like-a-ted-talk-from-a-toaster/</guid>
+      <description>&lt;p&gt;&lt;em&gt;Originally published on LinkedIn in November 2025. Republished here for completeness.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;AI can be a great tool for job hunters. But only if you teach it to work both for you and like you.&lt;/p&gt;
+&lt;p&gt;But first, homework.&lt;/p&gt;
+&lt;p&gt;I hear your cry now. “You haven’t taught us anything yet! How can you give me homework?”&lt;/p&gt;
+&lt;p&gt;I respond. “Rest your mind young padawan.”&lt;/p&gt;
+&lt;p&gt;Before you ask your choice of LLM to do something like writing a letter or document, you need to teach it how to sound like you. As mine explained to me early on, “you don’t want a cover letter that sounds like a TED talk from a toaster.” If you know me, you’ve already realised that I have a weird, dark and cynical sense of humour, and so do my settings in ChatGPT.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>5 Months 100 Job Applications and a Crash Course in AI. How can I help?</title>
+      <link>http://localhost:1313/posts/5-months-100-job-applications-and-a-crash-course-in-ai/</link>
+      <pubDate>Tue, 04 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/5-months-100-job-applications-and-a-crash-course-in-ai/</guid>
+      <description>&lt;p&gt;&lt;em&gt;Originally published on LinkedIn in November 2025. Republished here for completeness.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;I’m in a new role and loving what I&amp;rsquo;m doing. But after 5 months on the job search, I’m still a little shell shocked from the whole experience.&lt;/p&gt;
+&lt;p&gt;My network has some great people here. Seriously, some of the best recruitment talent not only in Brisbane but further afield. I know a lot of them took the time to call and see how I was doing, gave me some of the best feedback I’ve ever had, and sat and shared my sense of woe at the job market that is.&lt;/p&gt;</description>
+    </item>
   </channel>
 </rss>
