@@ -2,25 +2,35 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Jamie Allen</title>
-    <link>http://localhost:1313/</link>
+    <link>https://jamieallen1.github.io/</link>
     <description>Recent content on Jamie Allen</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-au</language>
-    <lastBuildDate>Fri, 12 Dec 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 25 Mar 2026 07:00:00 +1000</lastBuildDate>
+    <atom:link href="https://jamieallen1.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>From Confident Nonsense to Constrained SQL</title>
+      <link>https://jamieallen1.github.io/posts/from-confident-nonsense-to-constrained-sql/</link>
+      <pubDate>Wed, 25 Mar 2026 07:00:00 +1000</pubDate>
+      <guid>https://jamieallen1.github.io/posts/from-confident-nonsense-to-constrained-sql/</guid>
+      <description>&lt;h1 id=&#34;tldr&#34;&gt;TL/DR&lt;/h1&gt;
+&lt;p&gt;I built a SQL AI Agent (using OpenAI/ChatGPT 5) just to see how they worked, and the results were kind of surprising. All code in this example is in my Github repo (&lt;a href=&#34;https://github.com/JamieAllen1/duckdb-sql-agent-poc&#34;&gt;https://github.com/JamieAllen1/duckdb-sql-agent-poc&lt;/a&gt;)&lt;/p&gt;
+&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;I was flicking through some reading thanks to &lt;a href=&#34;https://tldr.tech/ai/2026-01-30&#34;&gt;TLDR AI&lt;/a&gt; and linked through to this blog on &lt;a href=&#34;https://openai.com/index/inside-our-in-house-data-agent/?utm_source=tldrai&#34;&gt;OpenAI&amp;rsquo;s in-house data agent&lt;/a&gt;. Interesting read. Seeing as I&amp;rsquo;m a lot of a data nerd and a bit of an AI nerd, I figured it would be interesting to see what it takes to build my own.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Data Matching: What Actually Breaks</title>
-      <link>http://localhost:1313/posts/data-matching/</link>
+      <link>https://jamieallen1.github.io/posts/data-matching/</link>
       <pubDate>Fri, 12 Dec 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/data-matching/</guid>
+      <guid>https://jamieallen1.github.io/posts/data-matching/</guid>
       <description>&lt;p&gt;I thought I’d do something different this week and talk about data. Not just data in general, but what I’ve been doing for the last few months on a project.&lt;/p&gt;
 &lt;p&gt;Without going into detail on the where and why, the problem that I’ve been working on for the last few months is neatly defined by one phrase - Data Matching. Data Matching is the process whereby records from different sources are matched using various characteristics to attempt to identify a single view of an individual. It’s extensively used in the retail world between sales data, clickstream data from websites, google search data and data from social media, and potentially other sources. And yes - this is why when you googled walking shoes, you all of a sudden got a rush of content popping up about that very thing, and why the shoe store you bought the previous pair from 9 months ago all of a sudden emailed you saying they had a special deal for you on that very shoe. (True story - Under Armour in the US owned the MyFitnessPal app platform until 2020. Using data from their product testing, sales history and the fitness tracking app they would calculate the approximate time that someone would be looking for a new pair of running shoes, then email them a special one off voucher for a replacement for the shoes they currently owned.)&lt;/p&gt;</description>
     </item>
     <item>
       <title>Stop Letting a Toaster Write Your CV</title>
-      <link>http://localhost:1313/posts/stop-letting-a-toaster-write-your-cv/</link>
+      <link>https://jamieallen1.github.io/posts/stop-letting-a-toaster-write-your-cv/</link>
       <pubDate>Fri, 05 Dec 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/stop-letting-a-toaster-write-your-cv/</guid>
+      <guid>https://jamieallen1.github.io/posts/stop-letting-a-toaster-write-your-cv/</guid>
       <description>&lt;p&gt;&lt;em&gt;Originally published on LinkedIn in December 2025. Republished here for completeness.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;We’ve all been there. It’s that time again where you head out on the job search and need to update your CV. You open the last one, click File -&amp;gt; Save As, then go down to the summary and start shoving in the latest brain dump of your most recent role.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;STOP RIGHT THERE!&lt;/strong&gt;&lt;/p&gt;
@@ -28,9 +38,9 @@
     </item>
     <item>
       <title>When You Don&#39;t Want a Cover Letter That Sounds Like a Ted Talk From a Toaster</title>
-      <link>http://localhost:1313/posts/when-you-dont-want-a-cover-letter-that-sounds-like-a-ted-talk-from-a-toaster/</link>
+      <link>https://jamieallen1.github.io/posts/when-you-dont-want-a-cover-letter-that-sounds-like-a-ted-talk-from-a-toaster/</link>
       <pubDate>Fri, 21 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/when-you-dont-want-a-cover-letter-that-sounds-like-a-ted-talk-from-a-toaster/</guid>
+      <guid>https://jamieallen1.github.io/posts/when-you-dont-want-a-cover-letter-that-sounds-like-a-ted-talk-from-a-toaster/</guid>
       <description>&lt;p&gt;&lt;em&gt;Originally published on LinkedIn in November 2025. Republished here for completeness.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;AI can be a great tool for job hunters. But only if you teach it to work both for you and like you.&lt;/p&gt;
 &lt;p&gt;But first, homework.&lt;/p&gt;
@@ -40,9 +50,9 @@
     </item>
     <item>
       <title>5 Months 100 Job Applications and a Crash Course in AI. How can I help?</title>
-      <link>http://localhost:1313/posts/5-months-100-job-applications-and-a-crash-course-in-ai/</link>
+      <link>https://jamieallen1.github.io/posts/5-months-100-job-applications-and-a-crash-course-in-ai/</link>
       <pubDate>Tue, 04 Nov 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/5-months-100-job-applications-and-a-crash-course-in-ai/</guid>
+      <guid>https://jamieallen1.github.io/posts/5-months-100-job-applications-and-a-crash-course-in-ai/</guid>
       <description>&lt;p&gt;&lt;em&gt;Originally published on LinkedIn in November 2025. Republished here for completeness.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;I’m in a new role and loving what I&amp;rsquo;m doing. But after 5 months on the job search, I’m still a little shell shocked from the whole experience.&lt;/p&gt;
 &lt;p&gt;My network has some great people here. Seriously, some of the best recruitment talent not only in Brisbane but further afield. I know a lot of them took the time to call and see how I was doing, gave me some of the best feedback I’ve ever had, and sat and shared my sense of woe at the job market that is.&lt;/p&gt;</description>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>From Confident Nonsense to Constrained SQL | Jamie Allen</title>
+<meta name="keywords" content="">
+<meta name="description" content="TL/DR
+I built a SQL AI Agent (using OpenAI/ChatGPT 5) just to see how they worked, and the results were kind of surprising. All code in this example is in my Github repo (https://github.com/JamieAllen1/duckdb-sql-agent-poc)
+Introduction
+I was flicking through some reading thanks to TLDR AI and linked through to this blog on OpenAI&rsquo;s in-house data agent. Interesting read. Seeing as I&rsquo;m a lot of a data nerd and a bit of an AI nerd, I figured it would be interesting to see what it takes to build my own.">
+<meta name="author" content="">
+<link rel="canonical" href="https://jamieallen1.github.io/posts/from-confident-nonsense-to-constrained-sql/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://jamieallen1.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://jamieallen1.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://jamieallen1.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://jamieallen1.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://jamieallen1.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://jamieallen1.github.io/posts/from-confident-nonsense-to-constrained-sql/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://jamieallen1.github.io/posts/from-confident-nonsense-to-constrained-sql/">
+  <meta property="og:site_name" content="Jamie Allen">
+  <meta property="og:title" content="From Confident Nonsense to Constrained SQL">
+  <meta property="og:description" content="TL/DR I built a SQL AI Agent (using OpenAI/ChatGPT 5) just to see how they worked, and the results were kind of surprising. All code in this example is in my Github repo (https://github.com/JamieAllen1/duckdb-sql-agent-poc)
+Introduction I was flicking through some reading thanks to TLDR AI and linked through to this blog on OpenAI’s in-house data agent. Interesting read. Seeing as I’m a lot of a data nerd and a bit of an AI nerd, I figured it would be interesting to see what it takes to build my own.">
+  <meta property="og:locale" content="en-au">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-03-25T07:00:00+10:00">
+    <meta property="article:modified_time" content="2026-03-25T07:00:00+10:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="From Confident Nonsense to Constrained SQL">
+<meta name="twitter:description" content="TL/DR
+I built a SQL AI Agent (using OpenAI/ChatGPT 5) just to see how they worked, and the results were kind of surprising. All code in this example is in my Github repo (https://github.com/JamieAllen1/duckdb-sql-agent-poc)
+Introduction
+I was flicking through some reading thanks to TLDR AI and linked through to this blog on OpenAI&rsquo;s in-house data agent. Interesting read. Seeing as I&rsquo;m a lot of a data nerd and a bit of an AI nerd, I figured it would be interesting to see what it takes to build my own.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://jamieallen1.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "From Confident Nonsense to Constrained SQL",
+      "item": "https://jamieallen1.github.io/posts/from-confident-nonsense-to-constrained-sql/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "From Confident Nonsense to Constrained SQL",
+  "name": "From Confident Nonsense to Constrained SQL",
+  "description": "TL/DR I built a SQL AI Agent (using OpenAI/ChatGPT 5) just to see how they worked, and the results were kind of surprising. All code in this example is in my Github repo (https://github.com/JamieAllen1/duckdb-sql-agent-poc)\nIntroduction I was flicking through some reading thanks to TLDR AI and linked through to this blog on OpenAI\u0026rsquo;s in-house data agent. Interesting read. Seeing as I\u0026rsquo;m a lot of a data nerd and a bit of an AI nerd, I figured it would be interesting to see what it takes to build my own.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "TL/DR I built a SQL AI Agent (using OpenAI/ChatGPT 5) just to see how they worked, and the results were kind of surprising. All code in this example is in my Github repo (https://github.com/JamieAllen1/duckdb-sql-agent-poc)\nIntroduction I was flicking through some reading thanks to TLDR AI and linked through to this blog on OpenAI’s in-house data agent. Interesting read. Seeing as I’m a lot of a data nerd and a bit of an AI nerd, I figured it would be interesting to see what it takes to build my own.\nOpenAI has a very nice document on what makes an AI Agent an Agent and what doesn’t with some neat examples at (https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf) but I want one that queries a database. Simples right?\nSo where do I start - the beginning.\nStep 1 - Find a database and some data I just happen to have DuckDB laying around on my laptop. Don’t judge me - I like in-memory, column oriented DBs. Data? DuckDB comes with a nice little data generator that’s a core extension called tpch and is used for benchmarking the database. Do I care about DuckDB benchmarking? No I don’t. Does it create tables with data in them? Yes it does. It comes with a nice little parameter called Scale Factor (sf), the larger the number - the more data it creates. I don’t need a lot to define stuff - so lets go with 0.1 which will give us a database of about 25MB.\nimport duckdb con = duckdb.connect(\"data/tpch.duckdb\") # Generate TPC-H at scale factor 0.1 (tiny but useful) con.execute(\"CALL dbgen(sf=0.1);\") # Sanity check tables = con.execute(\"SHOW TABLES;\").fetchall() print(\"Tables created:\") for t in tables: print(\"-\", t[0]) con.close() This script created the following tables:\nTables created: - customer - lineitem - nation - orders - part - partsupp - region - supplier Remember these table names - we’ll need them soon.\nv0 - Can an LLM create a SQL query? One could assume it can - let’s prove it.\nfrom dotenv import load_dotenv import os from openai import OpenAI load_dotenv() client = OpenAI( api_key=os.getenv(\"OPENAI_API_KEY\") ) SYSTEM_PROMPT = \"\"\" You translate analytical questions into DuckDB SQL. Assume a reasonable schema if not provided. Return only SQL. \"\"\" def generate_sql(question: str) -\u003e str: resp = client.responses.create( model=\"gpt-5\", input=[ {\"role\": \"system\", \"content\": SYSTEM_PROMPT}, {\"role\": \"user\", \"content\": question}, ], ) return resp.output_text.strip() if __name__ == \"__main__\": q = \"Top 10 customers by total revenue last quarter\" print(generate_sql(q)) Nothing world breaking there. Let’s see what it comes up with.\nWITH quarter_bounds AS ( SELECT date_trunc('quarter', current_date) - INTERVAL '3 months' AS start_last_quarter, date_trunc('quarter', current_date) AS start_this_quarter ) SELECT c.customer_id, c.customer_name, SUM(oi.quantity * oi.unit_price) AS total_revenue FROM orders o JOIN order_items oi ON oi.order_id = o.order_id JOIN customers c ON c.customer_id = o.customer_id CROSS JOIN quarter_bounds qb WHERE o.order_date \u003e= qb.start_last_quarter AND o.order_date \u003c qb.start_this_quarter GROUP BY c.customer_id, c.customer_name ORDER BY total_revenue DESC LIMIT 10; Anyone see any issues yet? Just for the hell of it, and because we’ll need it later, let’s get it to run the query. Let’s create this as v1\nv1 - Create a query and run it I’ve changed a few things in this version.\nAdded DuckDB connectivity Upgraded the prompt as it was creating some very weird sql and changed the constraint Added then run_sql function to allow it to run the query. Added main() function to call everything and print the results (if any) and show errors. The new code is right in the repo here\nSo what did I get from it.\n--- Generated SQL --- WITH bounds AS ( SELECT date_trunc('quarter', current_date) AS start_current_q, date_trunc('quarter', current_date) - INTERVAL 3 MONTH AS start_last_q ) SELECT c.customer_id, c.customer_name, SUM(COALESCE(o.total_amount, 0)) AS total_revenue FROM orders o JOIN customers c ON c.customer_id = o.customer_id CROSS JOIN bounds b WHERE o.order_date \u003e= b.start_last_q AND o.order_date \u003c b.start_current_q GROUP BY c.customer_id, c.customer_name ORDER BY total_revenue DESC LIMIT 10 --- DuckDB Result --- ERROR: Catalog Error: Table with name customers does not exist! Did you mean \"customer\"? LINE 11: JOIN customers c ON c.customer_id = o.customer_id ^ SQL that failed: WITH bounds AS ( SELECT date_trunc('quarter', current_date) AS start_current_q, date_trunc('quarter', current_date) - INTERVAL 3 MONTH AS start_last_q ) SELECT c.customer_id, c.customer_name, SUM(COALESCE(o.total_amount, 0)) AS total_revenue FROM orders o JOIN customers c ON c.customer_id = o.customer_id CROSS JOIN bounds b WHERE o.order_date \u003e= b.start_last_q AND o.order_date \u003c b.start_current_q GROUP BY c.customer_id, c.customer_name ORDER BY total_revenue DESC LIMIT 10 What can we take from this example? ChatGPT knows nothing about the schema, and just made stuff up. That doesn’t help a lot. Next step - let’s let ChatGPT see the schema first, and see what it comes up with then.\nv2 - Adding schema awareness This version adds a lot.\nFirst off - I add a get_schema_context function to get the schema from DuckDB. Then, I update the generate_sql function to pass the schema information to the LLM in the user content (essentially context information) to allow it to use the schema to define the query. Rather than past the code here, I’ll add a link to the final version.\nHere’s what happens when I run it.\n--- Schema Context (excerpt) --- SCHEMA (DuckDB catalog): TABLES: - customer: c_custkey:BIGINT, c_name:VARCHAR, c_address:VARCHAR, c_nationkey:INTEGER, c_phone:VARCHAR, c_acctbal:DECIMAL(15,2), c_mktsegment:VARCHAR, c_comment:VARCHAR - lineitem: l_orderkey:BIGINT, l_partkey:BIGINT, l_suppkey:BIGINT, l_linenumber:BIGINT, l_quantity:DECIMAL(15,2), l_extendedprice:DECIMAL(15,2), l_discount:DECIMAL(15,2), l_tax:DECIMAL(15,2), l_returnflag:VARCHAR, l_linestatus:VARCHAR, l_shipdate:DATE, l_commitdate:DATE, l_receiptdate:DATE, l_shipinstruct:VARCHAR, l_shipmode:VARCHAR, l_comment:VARCHAR - nation: n_nationkey:INTEGER, n_name:VARCHAR, n_regionkey:INTEGER, n_comment:VARCHAR - orders: o_orderkey:BIGINT, o_custkey:BIGINT, o_orderstatus:VARCHAR, o_totalprice:DECIMAL(15,2), o_orderdate:DATE, o_orderpriority:VARCHAR, o_clerk:VARCHAR, o_shippriority:INTEGER, o_comment:VARCHAR - part: p_partkey:BIGINT, p_name:VARCHAR, p_mfgr:VARCHAR, p_brand:VARCHAR, p_type:VARCHAR, p_size:INTEGER, p_container:VARCHAR, p_retailprice:DECIMAL(15,2), p_comment:VARCHAR - partsupp: ps_partkey:BIGINT, ps_suppkey:BIGINT, ps_availqty:BIGINT, ps_supplycost:DECIMAL(15,2), ps_comment:VARCHAR - region: r_regionkey:INTEGER, r_name:VARCHAR, r_comment:VARCHAR - supplier: s_suppkey:BIGINT, s_name:VARCHAR, s_address:VARCHAR, s_nationkey:INTEGER, s_phone:VARCHAR, s_acctbal:DECIMAL(15,2), s_comment:VARCHAR ... (truncated) --- Generated SQL --- WITH prev_q AS ( SELECT date_trunc('quarter', CURRENT_DATE) - INTERVAL 3 MONTH AS q_start, date_trunc('quarter', CURRENT_DATE) - INTERVAL 1 DAY AS q_end ) SELECT c.c_custkey, c.c_name, SUM(li.l_extendedprice * (1 - li.l_discount)) AS total_revenue FROM prev_q p JOIN orders o ON o.o_orderdate BETWEEN p.q_start AND p.q_end JOIN lineitem li ON li.l_orderkey = o.o_orderkey JOIN customer c ON c.c_custkey = o.o_custkey GROUP BY c.c_custkey, c.c_name ORDER BY total_revenue DESC LIMIT 10; --- DuckDB Result --- Columns: ['c_custkey', 'c_name', 'total_revenue'] No rows returned?!?!?!\nHere’s where we’ve got too. ChatGPT knows about the schema, but it knows nothing about the data. If I look at the orders table in DuckDB, we find this:\nD SELECT min(o_orderdate), max(o_orderdate) FROM orders; ┌──────────────────┬──────────────────┐ │ min(o_orderdate) │ max(o_orderdate) │ │ date │ date │ ├──────────────────┼──────────────────┤ │ 1992-01-01 │ 1998-08-02 │ └──────────────────┴──────────────────┘ The tpch module creates the data back last century. Let’s update the prompt to generate data for the last three quarters relative to the last order date with this: - If the question uses relative time (e.g. \"last quarter\"), anchor it to the dataset using max(date_column) when available, not current_date\nLet’s try it again.\n--- Schema Context (excerpt) --- SCHEMA (DuckDB catalog): TABLES: - customer: c_custkey:BIGINT, c_name:VARCHAR, c_address:VARCHAR, c_nationkey:INTEGER, c_phone:VARCHAR, c_acctbal:DECIMAL(15,2), c_mktsegment:VARCHAR, c_comment:VARCHAR - lineitem: l_orderkey:BIGINT, l_partkey:BIGINT, l_suppkey:BIGINT, l_linenumber:BIGINT, l_quantity:DECIMAL(15,2), l_extendedprice:DECIMAL(15,2), l_discount:DECIMAL(15,2), l_tax:DECIMAL(15,2), l_returnflag:VARCHAR, l_linestatus:VARCHAR, l_shipdate:DATE, l_commitdate:DATE, l_receiptdate:DATE, l_shipinstruct:VARCHAR, l_shipmode:VARCHAR, l_comment:VARCHAR - nation: n_nationkey:INTEGER, n_name:VARCHAR, n_regionkey:INTEGER, n_comment:VARCHAR - orders: o_orderkey:BIGINT, o_custkey:BIGINT, o_orderstatus:VARCHAR, o_totalprice:DECIMAL(15,2), o_orderdate:DATE, o_orderpriority:VARCHAR, o_clerk:VARCHAR, o_shippriority:INTEGER, o_comment:VARCHAR - part: p_partkey:BIGINT, p_name:VARCHAR, p_mfgr:VARCHAR, p_brand:VARCHAR, p_type:VARCHAR, p_size:INTEGER, p_container:VARCHAR, p_retailprice:DECIMAL(15,2), p_comment:VARCHAR - partsupp: ps_partkey:BIGINT, ps_suppkey:BIGINT, ps_availqty:BIGINT, ps_supplycost:DECIMAL(15,2), ps_comment:VARCHAR - region: r_regionkey:INTEGER, r_name:VARCHAR, r_comment:VARCHAR - supplier: s_suppkey:BIGINT, s_name:VARCHAR, s_address:VARCHAR, s_nationkey:INTEGER, s_phone:VARCHAR, s_acctbal:DECIMAL(15,2), s_comment:VARCHAR ... (truncated) --- Generated SQL --- WITH bounds AS ( SELECT date_trunc('quarter', max(o_orderdate)) AS current_q_start, date_trunc('quarter', max(o_orderdate)) - INTERVAL '3 months' AS last_q_start FROM orders ) SELECT c.c_custkey, c.c_name, SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue FROM bounds b JOIN orders o ON o.o_orderdate \u003e= b.last_q_start AND o.o_orderdate \u003c b.current_q_start JOIN lineitem l ON l.l_orderkey = o.o_orderkey JOIN customer c ON c.c_custkey = o.o_custkey GROUP BY c.c_custkey, c.c_name ORDER BY total_revenue DESC LIMIT 10; --- DuckDB Result --- Columns: ['c_custkey', 'c_name', 'total_revenue'] (13207, 'Customer#000013207', Decimal('1179787.4360')) (4657, 'Customer#000004657', Decimal('934506.3642')) (1006, 'Customer#000001006', Decimal('906958.1703')) (9877, 'Customer#000009877', Decimal('787345.8546')) (8635, 'Customer#000008635', Decimal('784201.0802')) (13771, 'Customer#000013771', Decimal('782794.3374')) (11624, 'Customer#000011624', Decimal('752368.6609')) (8092, 'Customer#000008092', Decimal('732949.2941')) (1408, 'Customer#000001408', Decimal('731986.5933')) (14836, 'Customer#000014836', Decimal('715083.0379')) That looks like something a little more useful. Is it analytics ready yet? Not really. But it’s a clean “Top 10” dataset.\nWhat have we found from this version. AI (or an LLM) can generate a useful query that works and run it against the database. What we did there was let it define the query, run it, then we refined the prompt, tried it again and we got something useful. Next version, we automate that process, with guardrails, and see if we can make it better.\nv3 – Adding a constrained retry loop In v2 I effectively acted as the “agent loop” myself:\nrun the query observe the outcome adjust the prompt retry In v3, I want to automate that. Not with infinite retries, and not with “autonomous” anything. Just a bounded loop that can:\nobserve basic facts about the dataset attempt a query if it fails (or returns nothing), revise and retry a small number of times The key point: observations should never crash the run. They’re diagnostics, not mission-critical. I actually hit this immediately when one of my own observation CTE names collided with a DuckDB reserved word. Humans: also fallible.\nWhat counts as “observation”? For this dataset I used a few cheap checks:\norder date range (min/max) row counts for the main tables how many orders exist in the “last quarter” window relative to the dataset max date Here’s the output:\n--- Observations (TPCH sanity checks) --- {'orders_date_range': {'ok': True, 'value': ('1992-01-01', '1998-08-02')}, 'counts_customer': {'ok': True, 'value': 15000}, 'counts_orders': {'ok': True, 'value': 150000}, 'counts_lineitem': {'ok': True, 'value': 600572}, 'orders_in_last_quarter_asof_max_date': {'ok': True, 'value': 5746}} That last number is important: the dataset does have data in the “last quarter” window if you anchor it correctly. So if a query returns 0 rows, we know something is off.\nAttempt 1 With schema + prompt constraints + observations in place, the first attempt succeeded:\n--- Attempt 1/3: Generated SQL --- WITH max_date AS ( SELECT max(o_orderdate) AS max_date FROM orders ), bounds AS ( SELECT date_trunc('quarter', max_date) AS curr_q_start, date_trunc('quarter', max_date) - INTERVAL '3 months' AS last_q_start FROM max_date ) SELECT c.c_custkey, c.c_name, SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue FROM orders o JOIN customer c ON c.c_custkey = o.o_custkey JOIN lineitem l ON l.l_orderkey = o.o_orderkey JOIN bounds b ON TRUE WHERE o.o_orderdate \u003e= b.last_q_start AND o.o_orderdate \u003c b.curr_q_start GROUP BY c.c_custkey, c.c_name ORDER BY total_revenue DESC LIMIT 10; And the result matched v2:\n--- DuckDB Result --- Columns: ['c_custkey', 'c_name', 'total_revenue'] (13207, 'Customer#000013207', Decimal('1179787.4360')) (4657, 'Customer#000004657', Decimal('934506.3642')) (1006, 'Customer#000001006', Decimal('906958.1703')) (9877, 'Customer#000009877', Decimal('787345.8546')) (8635, 'Customer#000008635', Decimal('784201.0802')) (13771, 'Customer#000013771', Decimal('782794.3374')) (11624, 'Customer#000011624', Decimal('752368.6609')) (8092, 'Customer#000008092', Decimal('732949.2941')) (1408, 'Customer#000001408', Decimal('731986.5933')) (14836, 'Customer#000014836', Decimal('715083.0379')) So… was a retry loop even needed? For this question and dataset, it didn’t need to retry.\nBut that’s missing the point.\nv3 is about changing the architecture from:\n“human-in-the-loop prompt fiddling” to: “a bounded loop that can react to failures” This matters because the moment you ask a slightly different question, or introduce different datasets, you will hit:\nSQL syntax errors wrong join paths empty result sets ambiguous metrics (what counts as “revenue”?) The retry loop isn’t magic. It’s just the minimum scaffolding needed for the system to correct itself based on what actually happened, rather than what it hoped would happen.\nWhat’s next?\nThe next step is not to make it smarter. It is to make it safer.\nThis is where v4 comes in:\nenforce read-only queries force LIMITs add timeouts standardise output (SQL used, assumptions, truncation warnings) v4 - Adding Real Guardrails Now we’re almost at the point of having the beginnings of an agent. I won’t consider to call it a real SQL agent as there is so much more that would have to go into it to make it work properly, and to guard it from doing something terrible. But this version will be the last for our little journey into the dark side, and at least I’ll have a better idea of how they work, and hopefully you will too.\nWhat I did A lot of the code in this version is still the same as v3.\nv4 is where I stopped trusting the agent and started constraining it. Up until this point it could generate, run, and even revise SQL, but it would still happily do whatever it thought was right. In this version I added a simple guardrail layer: enforce read-only queries, inject or cap LIMITs, and apply a basic timeout so it can’t run away with itself. On top of that, I standardised the output so every result includes the SQL that was executed, a set of inferred assumptions, and any warnings (like truncated results or guardrail interventions). None of this makes the agent smarter. It just makes its behaviour more predictable, easier to inspect, and a lot harder to accidentally trust without thinking.\nSo - how did it go?\nThe output --- Observations (TPCH sanity checks) --- {'orders_date_range': {'ok': True, 'value': ('1992-01-01', '1998-08-02')}, 'counts_customer': {'ok': True, 'value': 15000}, 'counts_orders': {'ok': True, 'value': 150000}, 'counts_lineitem': {'ok': True, 'value': 600572}, 'orders_in_last_quarter_asof_max_date': {'ok': True, 'value': 5746}} --- Attempt 1/3: Generated SQL --- WITH bounds AS ( SELECT date_trunc('quarter', max(o_orderdate)) AS current_qtr_start, date_trunc('quarter', max(o_orderdate)) - INTERVAL '3 months' AS last_qtr_start FROM orders ) SELECT c.c_custkey, c.c_name, c.c_address, c.c_phone, n.n_name AS nation, SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue FROM bounds b JOIN orders o ON o.o_orderdate \u003e= b.last_qtr_start AND o.o_orderdate \u003c b.current_qtr_start JOIN lineitem l ON l.l_orderkey = o.o_orderkey JOIN customer c ON c.c_custkey = o.o_custkey LEFT JOIN nation n ON n.n_nationkey = c.c_nationkey GROUP BY c.c_custkey, c.c_name, c.c_address, c.c_phone, n.n_name ORDER BY total_revenue DESC LIMIT 10; --- DuckDB Result --- Columns: ['c_custkey', 'c_name', 'c_address', 'c_phone', 'nation', 'total_revenue'] (13207, 'Customer#000013207', 'PP7IinI0y7M5aDPQNMMto', '18-380-733-7887', 'INDIA', Decimal('1179787.4360')) (4657, 'Customer#000004657', '80BclnwGfu4R,ECOAfY5j0', '13-193-651-4217', 'CANADA', Decimal('934506.3642')) (1006, 'Customer#000001006', 'bWUBQGOzQWhvqeJc8', '22-364-780-5932', 'JAPAN', Decimal('906958.1703')) (9877, 'Customer#000009877', 'FvILgiPmWCTPX kEb xOHAJ OCKH6NSke', '25-675-164-2805', 'MOROCCO', Decimal('787345.8546')) (8635, 'Customer#000008635', '8kgtIsxoCtPXQohFyS,iTILi2QhvS', '26-644-815-3446', 'MOZAMBIQUE', Decimal('784201.0802')) (13771, 'Customer#000013771', 'Vx9ieEzC40r', '13-697-441-8002', 'CANADA', Decimal('782794.3374')) (11624, 'Customer#000011624', '85fBe8pd2rlW1bxaf6CnyWRmsUncORaFnRY,B1,', '25-840-812-8455', 'MOROCCO', Decimal('752368.6609')) (8092, 'Customer#000008092', 'jq1gwKQxyfPHD PRVjX0904', '20-764-894-1875', 'IRAN', Decimal('732949.2941')) (1408, 'Customer#000001408', 'eeiPXCZnt611W3cm68,p1', '21-901-381-6344', 'IRAQ', Decimal('731986.5933')) (14836, 'Customer#000014836', 'AEYiXgKOWnR3Zfr7lBNZ5y', '33-909-505-1055', 'UNITED KINGDOM', Decimal('715083.0379')) jamieallen@MacBookPro duckdb-sql-agent-poc % python v4_guardrails/main.py --- Observations (TPCH sanity checks) --- {'orders_date_range': {'ok': True, 'value': ('1992-01-01', '1998-08-02')}, 'counts_customer': {'ok': True, 'value': 15000}, 'counts_orders': {'ok': True, 'value': 150000}, 'counts_lineitem': {'ok': True, 'value': 600572}, 'orders_in_last_quarter_asof_max_date': {'ok': True, 'value': 5746}} --- Attempt 1/3: Generated SQL --- WITH maxd AS ( SELECT MAX(o_orderdate) AS max_date FROM orders ), bounds AS ( SELECT (DATE_TRUNC('quarter', max_date) - INTERVAL '3 months') AS start_prev_qtr, (DATE_TRUNC('quarter', max_date) - INTERVAL '1 day') AS end_prev_qtr FROM maxd ) SELECT c.c_custkey, c.c_name, SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue FROM orders o JOIN bounds b ON TRUE JOIN customer c ON c.c_custkey = o.o_custkey JOIN lineitem l ON l.l_orderkey = o.o_orderkey WHERE o.o_orderdate \u003e= b.start_prev_qtr AND o.o_orderdate \u003c= b.end_prev_qtr GROUP BY c.c_custkey, c.c_name ORDER BY total_revenue DESC LIMIT 10; --- DuckDB Result --- Columns: ['c_custkey', 'c_name', 'total_revenue'] (13207, 'Customer#000013207', Decimal('1179787.4360')) (4657, 'Customer#000004657', Decimal('934506.3642')) (1006, 'Customer#000001006', Decimal('906958.1703')) (9877, 'Customer#000009877', Decimal('787345.8546')) (8635, 'Customer#000008635', Decimal('784201.0802')) (13771, 'Customer#000013771', Decimal('782794.3374')) (11624, 'Customer#000011624', Decimal('752368.6609')) (8092, 'Customer#000008092', Decimal('732949.2941')) (1408, 'Customer#000001408', Decimal('731986.5933')) (14836, 'Customer#000014836', Decimal('715083.0379')) --- Output Contract --- Question: Top 10 customers by total revenue last quarter SQL used: WITH maxd AS ( SELECT MAX(o_orderdate) AS max_date FROM orders ), bounds AS ( SELECT (DATE_TRUNC('quarter', max_date) - INTERVAL '3 months') AS start_prev_qtr, (DATE_TRUNC('quarter', max_date) - INTERVAL '1 day') AS end_prev_qtr FROM maxd ) SELECT c.c_custkey, c.c_name, SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue FROM orders o JOIN bounds b ON TRUE JOIN customer c ON c.c_custkey = o.o_custkey JOIN lineitem l ON l.l_orderkey = o.o_orderkey WHERE o.o_orderdate \u003e= b.start_prev_qtr AND o.o_orderdate \u003c= b.end_prev_qtr GROUP BY c.c_custkey, c.c_name ORDER BY total_revenue DESC LIMIT 10; Assumptions: - Relative time is anchored to max(o_orderdate) in the dataset. - Revenue appears to be derived from line item extended price and discount. - Results are aggregated at customer level. - Output is intentionally limited to a subset of rows. Warnings: - None. Guardrails: {'readonly_enforced': True, 'limit_info': {'limit_added': False, 'limit_capped': False, 'final_limit': 10, 'reason': 'existing_limit'}, 'timeout_seconds': 5, 'elapsed_seconds': 0.013} Final thoughts What started as a simple “can it write SQL?” experiment turned into something a bit more interesting. The model was never the problem. It was perfectly capable of producing plausible answers from the start. The difference between v0 and v4 wasn’t intelligence, it was constraint.\nAt each step, the system became less “clever” and more grounded:\nfirst by forcing it to see the schema then by anchoring it to the data itself then by letting it react to failure and finally by putting guardrails around what it’s allowed to do That’s really the takeaway. Agents aren’t about autonomy, they’re about controlled behaviour under uncertainty. Left alone, they’re very good at being confidently wrong. With the right constraints, they become predictably useful.\nThis little PoC isn’t a production system, and it’s not trying to be. But it does show where the real work is: not in getting an LLM to generate SQL, but in building the boundaries that make its output something you can actually trust.\n",
+  "wordCount" : "2831",
+  "inLanguage": "en",
+  "datePublished": "2026-03-25T07:00:00+10:00",
+  "dateModified": "2026-03-25T07:00:00+10:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://jamieallen1.github.io/posts/from-confident-nonsense-to-constrained-sql/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Jamie Allen",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://jamieallen1.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://jamieallen1.github.io/" accesskey="h" title="Jamie Allen (Alt + H)">Jamie Allen</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      From Confident Nonsense to Constrained SQL
+    </h1>
+    <div class="post-meta"><span title='2026-03-25 07:00:00 +1000 AEST'>March 25, 2026</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="tldr">TL/DR<a hidden class="anchor" aria-hidden="true" href="#tldr">#</a></h1>
+<p>I built a SQL AI Agent (using OpenAI/ChatGPT 5) just to see how they worked, and the results were kind of surprising. All code in this example is in my Github repo (<a href="https://github.com/JamieAllen1/duckdb-sql-agent-poc">https://github.com/JamieAllen1/duckdb-sql-agent-poc</a>)</p>
+<h1 id="introduction">Introduction<a hidden class="anchor" aria-hidden="true" href="#introduction">#</a></h1>
+<p>I was flicking through some reading thanks to <a href="https://tldr.tech/ai/2026-01-30">TLDR AI</a> and linked through to this blog on <a href="https://openai.com/index/inside-our-in-house-data-agent/?utm_source=tldrai">OpenAI&rsquo;s in-house data agent</a>. Interesting read. Seeing as I&rsquo;m a lot of a data nerd and a bit of an AI nerd, I figured it would be interesting to see what it takes to build my own.</p>
+<p>OpenAI has a very nice document on what makes an AI Agent an Agent and what doesn&rsquo;t with some neat examples at (<a href="https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf">https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf</a>) but I want one that queries a database. Simples right?</p>
+<p>So where do I start - the beginning.</p>
+<h1 id="step-1---find-a-database-and-some-data">Step 1 - Find a database and some data<a hidden class="anchor" aria-hidden="true" href="#step-1---find-a-database-and-some-data">#</a></h1>
+<p>I just happen to have DuckDB laying around on my laptop. Don&rsquo;t judge me - I like in-memory, column oriented DBs. Data? DuckDB comes with a nice little data generator that&rsquo;s a core extension called tpch and is used for benchmarking the database. Do I care about DuckDB benchmarking? No I don&rsquo;t. Does it create tables with data in them? Yes it does. It comes with a nice little parameter called Scale Factor (sf), the larger the number - the more data it creates. I don&rsquo;t need a lot to define stuff - so lets go with 0.1 which will give us a database of about 25MB.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> duckdb
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>con <span style="color:#f92672">=</span> duckdb<span style="color:#f92672">.</span>connect(<span style="color:#e6db74">&#34;data/tpch.duckdb&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate TPC-H at scale factor 0.1 (tiny but useful)</span>
+</span></span><span style="display:flex;"><span>con<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#34;CALL dbgen(sf=0.1);&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Sanity check</span>
+</span></span><span style="display:flex;"><span>tables <span style="color:#f92672">=</span> con<span style="color:#f92672">.</span>execute(<span style="color:#e6db74">&#34;SHOW TABLES;&#34;</span>)<span style="color:#f92672">.</span>fetchall()
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Tables created:&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> tables:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;-&#34;</span>, t[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>con<span style="color:#f92672">.</span>close()
+</span></span></code></pre></div><p>This script created the following tables:</p>
+<pre tabindex="0"><code>Tables created:
+- customer
+- lineitem
+- nation
+- orders
+- part
+- partsupp
+- region
+- supplier
+</code></pre><p>Remember these table names - we&rsquo;ll need them soon.</p>
+<h1 id="v0---can-an-llm-create-a-sql-query">v0 - Can an LLM create a SQL query?<a hidden class="anchor" aria-hidden="true" href="#v0---can-an-llm-create-a-sql-query">#</a></h1>
+<p>One could assume it can - let&rsquo;s prove it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> dotenv <span style="color:#f92672">import</span> load_dotenv
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>load_dotenv()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>client <span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>    api_key<span style="color:#f92672">=</span>os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#34;OPENAI_API_KEY&#34;</span>)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>SYSTEM_PROMPT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">You translate analytical questions into DuckDB SQL.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Assume a reasonable schema if not provided.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Return only SQL.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">generate_sql</span>(question: str) <span style="color:#f92672">-&gt;</span> str:
+</span></span><span style="display:flex;"><span>    resp <span style="color:#f92672">=</span> client<span style="color:#f92672">.</span>responses<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;gpt-5&#34;</span>,
+</span></span><span style="display:flex;"><span>        input<span style="color:#f92672">=</span>[
+</span></span><span style="display:flex;"><span>            {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: SYSTEM_PROMPT},
+</span></span><span style="display:flex;"><span>            {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> resp<span style="color:#f92672">.</span>output_text<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    q <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Top 10 customers by total revenue last quarter&#34;</span>
+</span></span><span style="display:flex;"><span>    print(generate_sql(q))
+</span></span></code></pre></div><p>Nothing world breaking there. Let&rsquo;s see what it comes up with.</p>
+<pre tabindex="0"><code>WITH quarter_bounds AS (
+  SELECT
+    date_trunc(&#39;quarter&#39;, current_date) - INTERVAL &#39;3 months&#39; AS start_last_quarter,
+    date_trunc(&#39;quarter&#39;, current_date) AS start_this_quarter
+)
+SELECT
+  c.customer_id,
+  c.customer_name,
+  SUM(oi.quantity * oi.unit_price) AS total_revenue
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.order_id
+JOIN customers c ON c.customer_id = o.customer_id
+CROSS JOIN quarter_bounds qb
+WHERE o.order_date &gt;= qb.start_last_quarter
+  AND o.order_date &lt; qb.start_this_quarter
+GROUP BY c.customer_id, c.customer_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+</code></pre><p>Anyone see any issues yet? Just for the hell of it, and because we&rsquo;ll need it later, let&rsquo;s get it to run the query. Let&rsquo;s create this as v1</p>
+<h1 id="v1---create-a-query-and-run-it">v1 - Create a query and run it<a hidden class="anchor" aria-hidden="true" href="#v1---create-a-query-and-run-it">#</a></h1>
+<p>I&rsquo;ve changed a few things in this version.</p>
+<ol>
+<li>Added DuckDB connectivity</li>
+<li>Upgraded the prompt as it was creating some very weird sql and changed the constraint</li>
+<li>Added then run_sql function to allow it to run the query.</li>
+<li>Added main() function to call everything and print the results (if any) and show errors.</li>
+</ol>
+<p>The new code is right in the repo <a href="https://github.com/JamieAllen1/duckdb-sql-agent-poc/tree/main/v1_tool_execution">here</a></p>
+<p>So what did I get from it.</p>
+<pre tabindex="0"><code>--- Generated SQL ---
+
+WITH bounds AS (
+  SELECT
+    date_trunc(&#39;quarter&#39;, current_date) AS start_current_q,
+    date_trunc(&#39;quarter&#39;, current_date) - INTERVAL 3 MONTH AS start_last_q
+)
+SELECT
+  c.customer_id,
+  c.customer_name,
+  SUM(COALESCE(o.total_amount, 0)) AS total_revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+CROSS JOIN bounds b
+WHERE o.order_date &gt;= b.start_last_q
+  AND o.order_date &lt; b.start_current_q
+GROUP BY c.customer_id, c.customer_name
+ORDER BY total_revenue DESC
+LIMIT 10
+
+--- DuckDB Result ---
+
+ERROR:
+Catalog Error: Table with name customers does not exist!
+Did you mean &#34;customer&#34;?
+
+LINE 11: JOIN customers c ON c.customer_id = o.customer_id
+              ^
+
+SQL that failed:
+
+WITH bounds AS (
+  SELECT
+    date_trunc(&#39;quarter&#39;, current_date) AS start_current_q,
+    date_trunc(&#39;quarter&#39;, current_date) - INTERVAL 3 MONTH AS start_last_q
+)
+SELECT
+  c.customer_id,
+  c.customer_name,
+  SUM(COALESCE(o.total_amount, 0)) AS total_revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+CROSS JOIN bounds b
+WHERE o.order_date &gt;= b.start_last_q
+  AND o.order_date &lt; b.start_current_q
+GROUP BY c.customer_id, c.customer_name
+ORDER BY total_revenue DESC
+LIMIT 10
+</code></pre><p>What can we take from this example? ChatGPT knows nothing about the schema, and just made stuff up. That doesn&rsquo;t help a lot. Next step - let&rsquo;s let ChatGPT see the schema first, and see what it comes up with then.</p>
+<h1 id="v2---adding-schema-awareness">v2 - Adding schema awareness<a hidden class="anchor" aria-hidden="true" href="#v2---adding-schema-awareness">#</a></h1>
+<p>This version adds a lot.</p>
+<p>First off - I add a <code>get_schema_context</code> function to get the schema from DuckDB. Then, I update the <code>generate_sql</code> function to pass the schema information to the LLM in the user content (essentially context information) to allow it to use the schema to define the query. Rather than past the code here, I&rsquo;ll add a link to the <a href="https://github.com/JamieAllen1/duckdb-sql-agent-poc/tree/main/v2_schema_awareness">final version</a>.</p>
+<p>Here&rsquo;s what happens when I run it.</p>
+<pre tabindex="0"><code>--- Schema Context (excerpt) ---
+
+SCHEMA (DuckDB catalog):
+TABLES:
+- customer: c_custkey:BIGINT, c_name:VARCHAR, c_address:VARCHAR, c_nationkey:INTEGER, c_phone:VARCHAR, c_acctbal:DECIMAL(15,2), c_mktsegment:VARCHAR, c_comment:VARCHAR
+- lineitem: l_orderkey:BIGINT, l_partkey:BIGINT, l_suppkey:BIGINT, l_linenumber:BIGINT, l_quantity:DECIMAL(15,2), l_extendedprice:DECIMAL(15,2), l_discount:DECIMAL(15,2), l_tax:DECIMAL(15,2), l_returnflag:VARCHAR, l_linestatus:VARCHAR, l_shipdate:DATE, l_commitdate:DATE, l_receiptdate:DATE, l_shipinstruct:VARCHAR, l_shipmode:VARCHAR, l_comment:VARCHAR
+- nation: n_nationkey:INTEGER, n_name:VARCHAR, n_regionkey:INTEGER, n_comment:VARCHAR
+- orders: o_orderkey:BIGINT, o_custkey:BIGINT, o_orderstatus:VARCHAR, o_totalprice:DECIMAL(15,2), o_orderdate:DATE, o_orderpriority:VARCHAR, o_clerk:VARCHAR, o_shippriority:INTEGER, o_comment:VARCHAR
+- part: p_partkey:BIGINT, p_name:VARCHAR, p_mfgr:VARCHAR, p_brand:VARCHAR, p_type:VARCHAR, p_size:INTEGER, p_container:VARCHAR, p_retailprice:DECIMAL(15,2), p_comment:VARCHAR
+- partsupp: ps_partkey:BIGINT, ps_suppkey:BIGINT, ps_availqty:BIGINT, ps_supplycost:DECIMAL(15,2), ps_comment:VARCHAR
+- region: r_regionkey:INTEGER, r_name:VARCHAR, r_comment:VARCHAR
+- supplier: s_suppkey:BIGINT, s_name:VARCHAR, s_address:VARCHAR, s_nationkey:INTEGER, s_phone:VARCHAR, s_acctbal:DECIMAL(15,2), s_comment:VARCHAR
+
+... (truncated)
+
+
+--- Generated SQL ---
+
+WITH prev_q AS (
+  SELECT
+    date_trunc(&#39;quarter&#39;, CURRENT_DATE) - INTERVAL 3 MONTH AS q_start,
+    date_trunc(&#39;quarter&#39;, CURRENT_DATE) - INTERVAL 1 DAY AS q_end
+)
+SELECT
+  c.c_custkey,
+  c.c_name,
+  SUM(li.l_extendedprice * (1 - li.l_discount)) AS total_revenue
+FROM prev_q p
+JOIN orders o ON o.o_orderdate BETWEEN p.q_start AND p.q_end
+JOIN lineitem li ON li.l_orderkey = o.o_orderkey
+JOIN customer c ON c.c_custkey = o.o_custkey
+GROUP BY c.c_custkey, c.c_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+--- DuckDB Result ---
+
+Columns: [&#39;c_custkey&#39;, &#39;c_name&#39;, &#39;total_revenue&#39;]
+</code></pre><p>No rows returned?!?!?!</p>
+<p>Here&rsquo;s where we&rsquo;ve got too. ChatGPT knows about the schema, but it knows nothing about the data. If I look at the orders table in DuckDB, we find this:</p>
+<pre tabindex="0"><code>D SELECT min(o_orderdate), max(o_orderdate) FROM orders;
+┌──────────────────┬──────────────────┐
+│ min(o_orderdate) │ max(o_orderdate) │
+│       date       │       date       │
+├──────────────────┼──────────────────┤
+│ 1992-01-01       │ 1998-08-02       │
+└──────────────────┴──────────────────┘
+</code></pre><p>The tpch module creates the data back last century. Let&rsquo;s update the prompt to generate data for the last three quarters relative to the last order date with this:
+<code>- If the question uses relative time (e.g. &quot;last quarter&quot;), anchor it to the dataset using max(date_column) when available, not current_date</code></p>
+<p>Let&rsquo;s try it again.</p>
+<pre tabindex="0"><code>--- Schema Context (excerpt) ---
+
+SCHEMA (DuckDB catalog):
+TABLES:
+- customer: c_custkey:BIGINT, c_name:VARCHAR, c_address:VARCHAR, c_nationkey:INTEGER, c_phone:VARCHAR, c_acctbal:DECIMAL(15,2), c_mktsegment:VARCHAR, c_comment:VARCHAR
+- lineitem: l_orderkey:BIGINT, l_partkey:BIGINT, l_suppkey:BIGINT, l_linenumber:BIGINT, l_quantity:DECIMAL(15,2), l_extendedprice:DECIMAL(15,2), l_discount:DECIMAL(15,2), l_tax:DECIMAL(15,2), l_returnflag:VARCHAR, l_linestatus:VARCHAR, l_shipdate:DATE, l_commitdate:DATE, l_receiptdate:DATE, l_shipinstruct:VARCHAR, l_shipmode:VARCHAR, l_comment:VARCHAR
+- nation: n_nationkey:INTEGER, n_name:VARCHAR, n_regionkey:INTEGER, n_comment:VARCHAR
+- orders: o_orderkey:BIGINT, o_custkey:BIGINT, o_orderstatus:VARCHAR, o_totalprice:DECIMAL(15,2), o_orderdate:DATE, o_orderpriority:VARCHAR, o_clerk:VARCHAR, o_shippriority:INTEGER, o_comment:VARCHAR
+- part: p_partkey:BIGINT, p_name:VARCHAR, p_mfgr:VARCHAR, p_brand:VARCHAR, p_type:VARCHAR, p_size:INTEGER, p_container:VARCHAR, p_retailprice:DECIMAL(15,2), p_comment:VARCHAR
+- partsupp: ps_partkey:BIGINT, ps_suppkey:BIGINT, ps_availqty:BIGINT, ps_supplycost:DECIMAL(15,2), ps_comment:VARCHAR
+- region: r_regionkey:INTEGER, r_name:VARCHAR, r_comment:VARCHAR
+- supplier: s_suppkey:BIGINT, s_name:VARCHAR, s_address:VARCHAR, s_nationkey:INTEGER, s_phone:VARCHAR, s_acctbal:DECIMAL(15,2), s_comment:VARCHAR
+
+... (truncated)
+
+
+--- Generated SQL ---
+
+WITH bounds AS (
+  SELECT
+    date_trunc(&#39;quarter&#39;, max(o_orderdate)) AS current_q_start,
+    date_trunc(&#39;quarter&#39;, max(o_orderdate)) - INTERVAL &#39;3 months&#39; AS last_q_start
+  FROM orders
+)
+SELECT
+  c.c_custkey,
+  c.c_name,
+  SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue
+FROM bounds b
+JOIN orders o
+  ON o.o_orderdate &gt;= b.last_q_start
+ AND o.o_orderdate &lt; b.current_q_start
+JOIN lineitem l ON l.l_orderkey = o.o_orderkey
+JOIN customer c ON c.c_custkey = o.o_custkey
+GROUP BY c.c_custkey, c.c_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+--- DuckDB Result ---
+
+Columns: [&#39;c_custkey&#39;, &#39;c_name&#39;, &#39;total_revenue&#39;]
+(13207, &#39;Customer#000013207&#39;, Decimal(&#39;1179787.4360&#39;))
+(4657, &#39;Customer#000004657&#39;, Decimal(&#39;934506.3642&#39;))
+(1006, &#39;Customer#000001006&#39;, Decimal(&#39;906958.1703&#39;))
+(9877, &#39;Customer#000009877&#39;, Decimal(&#39;787345.8546&#39;))
+(8635, &#39;Customer#000008635&#39;, Decimal(&#39;784201.0802&#39;))
+(13771, &#39;Customer#000013771&#39;, Decimal(&#39;782794.3374&#39;))
+(11624, &#39;Customer#000011624&#39;, Decimal(&#39;752368.6609&#39;))
+(8092, &#39;Customer#000008092&#39;, Decimal(&#39;732949.2941&#39;))
+(1408, &#39;Customer#000001408&#39;, Decimal(&#39;731986.5933&#39;))
+(14836, &#39;Customer#000014836&#39;, Decimal(&#39;715083.0379&#39;))
+</code></pre><p>That looks like something a little more useful. Is it analytics ready yet? Not really. But it&rsquo;s a clean &ldquo;Top 10&rdquo; dataset.</p>
+<p>What have we found from this version. AI (or an LLM) can generate a useful query that works and run it against the database. What we did there was let it define the query, run it, then we refined the prompt, tried it again and we got something useful. Next version, we automate that process, with guardrails, and see if we can make it better.</p>
+<h1 id="v3--adding-a-constrained-retry-loop">v3 – Adding a constrained retry loop<a hidden class="anchor" aria-hidden="true" href="#v3--adding-a-constrained-retry-loop">#</a></h1>
+<p>In v2 I effectively acted as the “agent loop” myself:</p>
+<ul>
+<li>run the query</li>
+<li>observe the outcome</li>
+<li>adjust the prompt</li>
+<li>retry</li>
+</ul>
+<p>In v3, I want to automate that. Not with infinite retries, and not with “autonomous” anything. Just a bounded loop that can:</p>
+<ul>
+<li>observe basic facts about the dataset</li>
+<li>attempt a query</li>
+<li>if it fails (or returns nothing), revise and retry a small number of times</li>
+</ul>
+<p>The key point: <strong>observations should never crash the run</strong>. They’re diagnostics, not mission-critical. I actually hit this immediately when one of my own observation CTE names collided with a DuckDB reserved word. Humans: also fallible.</p>
+<h2 id="what-counts-as-observation">What counts as “observation”?<a hidden class="anchor" aria-hidden="true" href="#what-counts-as-observation">#</a></h2>
+<p>For this dataset I used a few cheap checks:</p>
+<ul>
+<li>order date range (min/max)</li>
+<li>row counts for the main tables</li>
+<li>how many orders exist in the “last quarter” window relative to the dataset max date</li>
+</ul>
+<p>Here’s the output:</p>
+<pre tabindex="0"><code>--- Observations (TPCH sanity checks) ---
+
+{&#39;orders_date_range&#39;: {&#39;ok&#39;: True, &#39;value&#39;: (&#39;1992-01-01&#39;, &#39;1998-08-02&#39;)}, &#39;counts_customer&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 15000}, &#39;counts_orders&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 150000}, &#39;counts_lineitem&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 600572}, &#39;orders_in_last_quarter_asof_max_date&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 5746}}
+</code></pre><p>That last number is important: the dataset <em>does</em> have data in the “last quarter” window if you anchor it correctly. So if a query returns 0 rows, we know something is off.</p>
+<h2 id="attempt-1">Attempt 1<a hidden class="anchor" aria-hidden="true" href="#attempt-1">#</a></h2>
+<p>With schema + prompt constraints + observations in place, the first attempt succeeded:</p>
+<pre tabindex="0"><code>--- Attempt 1/3: Generated SQL ---
+
+WITH max_date AS (
+  SELECT max(o_orderdate) AS max_date
+  FROM orders
+),
+bounds AS (
+  SELECT
+    date_trunc(&#39;quarter&#39;, max_date) AS curr_q_start,
+    date_trunc(&#39;quarter&#39;, max_date) - INTERVAL &#39;3 months&#39; AS last_q_start
+  FROM max_date
+)
+SELECT
+  c.c_custkey,
+  c.c_name,
+  SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue
+FROM orders o
+JOIN customer c ON c.c_custkey = o.o_custkey
+JOIN lineitem l ON l.l_orderkey = o.o_orderkey
+JOIN bounds b ON TRUE
+WHERE o.o_orderdate &gt;= b.last_q_start
+  AND o.o_orderdate &lt; b.curr_q_start
+GROUP BY c.c_custkey, c.c_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+</code></pre><p>And the result matched v2:</p>
+<pre tabindex="0"><code>--- DuckDB Result ---
+
+Columns: [&#39;c_custkey&#39;, &#39;c_name&#39;, &#39;total_revenue&#39;]
+(13207, &#39;Customer#000013207&#39;, Decimal(&#39;1179787.4360&#39;))
+(4657, &#39;Customer#000004657&#39;, Decimal(&#39;934506.3642&#39;))
+(1006, &#39;Customer#000001006&#39;, Decimal(&#39;906958.1703&#39;))
+(9877, &#39;Customer#000009877&#39;, Decimal(&#39;787345.8546&#39;))
+(8635, &#39;Customer#000008635&#39;, Decimal(&#39;784201.0802&#39;))
+(13771, &#39;Customer#000013771&#39;, Decimal(&#39;782794.3374&#39;))
+(11624, &#39;Customer#000011624&#39;, Decimal(&#39;752368.6609&#39;))
+(8092, &#39;Customer#000008092&#39;, Decimal(&#39;732949.2941&#39;))
+(1408, &#39;Customer#000001408&#39;, Decimal(&#39;731986.5933&#39;))
+(14836, &#39;Customer#000014836&#39;, Decimal(&#39;715083.0379&#39;))
+</code></pre><h2 id="so-was-a-retry-loop-even-needed">So… was a retry loop even needed?<a hidden class="anchor" aria-hidden="true" href="#so-was-a-retry-loop-even-needed">#</a></h2>
+<p>For this question and dataset, it didn’t need to retry.</p>
+<p>But that’s missing the point.</p>
+<p>v3 is about changing the architecture from:</p>
+<ul>
+<li>“human-in-the-loop prompt fiddling”
+to:</li>
+<li>“a bounded loop that can react to failures”</li>
+</ul>
+<p>This matters because the moment you ask a slightly different question, or introduce different datasets, you will hit:</p>
+<ul>
+<li>SQL syntax errors</li>
+<li>wrong join paths</li>
+<li>empty result sets</li>
+<li>ambiguous metrics (what counts as “revenue”?)</li>
+</ul>
+<p>The retry loop isn’t magic. It’s just the minimum scaffolding needed for the system to correct itself based on what actually happened, rather than what it hoped would happen.</p>
+<p>What&rsquo;s next?</p>
+<p>The next step is not to make it smarter. It is to make it safer.</p>
+<p>This is where v4 comes in:</p>
+<ul>
+<li>enforce read-only queries</li>
+<li>force LIMITs</li>
+<li>add timeouts</li>
+<li>standardise output (SQL used, assumptions, truncation warnings)</li>
+</ul>
+<h1 id="v4---adding-real-guardrails">v4 - Adding Real Guardrails<a hidden class="anchor" aria-hidden="true" href="#v4---adding-real-guardrails">#</a></h1>
+<p>Now we&rsquo;re almost at the point of having the beginnings of an agent. I won&rsquo;t consider to call it a real SQL agent as there is so much more that would have to go into it to make it work properly, and to guard it from doing something terrible. But this version will be the last for our little journey into the dark side, and at least I&rsquo;ll have a better idea of how they work, and hopefully you will too.</p>
+<h2 id="what-i-did">What I did<a hidden class="anchor" aria-hidden="true" href="#what-i-did">#</a></h2>
+<p>A lot of the code in this version is still the same as v3.</p>
+<p>v4 is where I stopped trusting the agent and started constraining it. Up until this point it could generate, run, and even revise SQL, but it would still happily do whatever it thought was right. In this version I added a simple guardrail layer: enforce read-only queries, inject or cap <code>LIMIT</code>s, and apply a basic timeout so it can’t run away with itself. On top of that, I standardised the output so every result includes the SQL that was executed, a set of inferred assumptions, and any warnings (like truncated results or guardrail interventions). None of this makes the agent smarter. It just makes its behaviour more predictable, easier to inspect, and a lot harder to accidentally trust without thinking.</p>
+<p>So - how did it go?</p>
+<h2 id="the-output">The output<a hidden class="anchor" aria-hidden="true" href="#the-output">#</a></h2>
+<pre tabindex="0"><code>--- Observations (TPCH sanity checks) ---
+
+{&#39;orders_date_range&#39;: {&#39;ok&#39;: True, &#39;value&#39;: (&#39;1992-01-01&#39;, &#39;1998-08-02&#39;)}, &#39;counts_customer&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 15000}, &#39;counts_orders&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 150000}, &#39;counts_lineitem&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 600572}, &#39;orders_in_last_quarter_asof_max_date&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 5746}}
+
+--- Attempt 1/3: Generated SQL ---
+
+WITH bounds AS (
+  SELECT
+    date_trunc(&#39;quarter&#39;, max(o_orderdate)) AS current_qtr_start,
+    date_trunc(&#39;quarter&#39;, max(o_orderdate)) - INTERVAL &#39;3 months&#39; AS last_qtr_start
+  FROM orders
+)
+SELECT
+  c.c_custkey,
+  c.c_name,
+  c.c_address,
+  c.c_phone,
+  n.n_name AS nation,
+  SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue
+FROM bounds b
+JOIN orders o
+  ON o.o_orderdate &gt;= b.last_qtr_start
+ AND o.o_orderdate &lt; b.current_qtr_start
+JOIN lineitem l ON l.l_orderkey = o.o_orderkey
+JOIN customer c ON c.c_custkey = o.o_custkey
+LEFT JOIN nation n ON n.n_nationkey = c.c_nationkey
+GROUP BY c.c_custkey, c.c_name, c.c_address, c.c_phone, n.n_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+--- DuckDB Result ---
+
+Columns: [&#39;c_custkey&#39;, &#39;c_name&#39;, &#39;c_address&#39;, &#39;c_phone&#39;, &#39;nation&#39;, &#39;total_revenue&#39;]
+(13207, &#39;Customer#000013207&#39;, &#39;PP7IinI0y7M5aDPQNMMto&#39;, &#39;18-380-733-7887&#39;, &#39;INDIA&#39;, Decimal(&#39;1179787.4360&#39;))
+(4657, &#39;Customer#000004657&#39;, &#39;80BclnwGfu4R,ECOAfY5j0&#39;, &#39;13-193-651-4217&#39;, &#39;CANADA&#39;, Decimal(&#39;934506.3642&#39;))
+(1006, &#39;Customer#000001006&#39;, &#39;bWUBQGOzQWhvqeJc8&#39;, &#39;22-364-780-5932&#39;, &#39;JAPAN&#39;, Decimal(&#39;906958.1703&#39;))
+(9877, &#39;Customer#000009877&#39;, &#39;FvILgiPmWCTPX kEb xOHAJ OCKH6NSke&#39;, &#39;25-675-164-2805&#39;, &#39;MOROCCO&#39;, Decimal(&#39;787345.8546&#39;))
+(8635, &#39;Customer#000008635&#39;, &#39;8kgtIsxoCtPXQohFyS,iTILi2QhvS&#39;, &#39;26-644-815-3446&#39;, &#39;MOZAMBIQUE&#39;, Decimal(&#39;784201.0802&#39;))
+(13771, &#39;Customer#000013771&#39;, &#39;Vx9ieEzC40r&#39;, &#39;13-697-441-8002&#39;, &#39;CANADA&#39;, Decimal(&#39;782794.3374&#39;))
+(11624, &#39;Customer#000011624&#39;, &#39;85fBe8pd2rlW1bxaf6CnyWRmsUncORaFnRY,B1,&#39;, &#39;25-840-812-8455&#39;, &#39;MOROCCO&#39;, Decimal(&#39;752368.6609&#39;))
+(8092, &#39;Customer#000008092&#39;, &#39;jq1gwKQxyfPHD PRVjX0904&#39;, &#39;20-764-894-1875&#39;, &#39;IRAN&#39;, Decimal(&#39;732949.2941&#39;))
+(1408, &#39;Customer#000001408&#39;, &#39;eeiPXCZnt611W3cm68,p1&#39;, &#39;21-901-381-6344&#39;, &#39;IRAQ&#39;, Decimal(&#39;731986.5933&#39;))
+(14836, &#39;Customer#000014836&#39;, &#39;AEYiXgKOWnR3Zfr7lBNZ5y&#39;, &#39;33-909-505-1055&#39;, &#39;UNITED KINGDOM&#39;, Decimal(&#39;715083.0379&#39;))
+jamieallen@MacBookPro duckdb-sql-agent-poc % python v4_guardrails/main.py
+
+--- Observations (TPCH sanity checks) ---
+
+{&#39;orders_date_range&#39;: {&#39;ok&#39;: True, &#39;value&#39;: (&#39;1992-01-01&#39;, &#39;1998-08-02&#39;)}, &#39;counts_customer&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 15000}, &#39;counts_orders&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 150000}, &#39;counts_lineitem&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 600572}, &#39;orders_in_last_quarter_asof_max_date&#39;: {&#39;ok&#39;: True, &#39;value&#39;: 5746}}
+
+--- Attempt 1/3: Generated SQL ---
+
+WITH maxd AS (
+  SELECT MAX(o_orderdate) AS max_date FROM orders
+),
+bounds AS (
+  SELECT
+    (DATE_TRUNC(&#39;quarter&#39;, max_date) - INTERVAL &#39;3 months&#39;) AS start_prev_qtr,
+    (DATE_TRUNC(&#39;quarter&#39;, max_date) - INTERVAL &#39;1 day&#39;) AS end_prev_qtr
+  FROM maxd
+)
+SELECT
+  c.c_custkey,
+  c.c_name,
+  SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue
+FROM orders o
+JOIN bounds b ON TRUE
+JOIN customer c ON c.c_custkey = o.o_custkey
+JOIN lineitem l ON l.l_orderkey = o.o_orderkey
+WHERE o.o_orderdate &gt;= b.start_prev_qtr
+  AND o.o_orderdate &lt;= b.end_prev_qtr
+GROUP BY c.c_custkey, c.c_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+--- DuckDB Result ---
+
+Columns: [&#39;c_custkey&#39;, &#39;c_name&#39;, &#39;total_revenue&#39;]
+(13207, &#39;Customer#000013207&#39;, Decimal(&#39;1179787.4360&#39;))
+(4657, &#39;Customer#000004657&#39;, Decimal(&#39;934506.3642&#39;))
+(1006, &#39;Customer#000001006&#39;, Decimal(&#39;906958.1703&#39;))
+(9877, &#39;Customer#000009877&#39;, Decimal(&#39;787345.8546&#39;))
+(8635, &#39;Customer#000008635&#39;, Decimal(&#39;784201.0802&#39;))
+(13771, &#39;Customer#000013771&#39;, Decimal(&#39;782794.3374&#39;))
+(11624, &#39;Customer#000011624&#39;, Decimal(&#39;752368.6609&#39;))
+(8092, &#39;Customer#000008092&#39;, Decimal(&#39;732949.2941&#39;))
+(1408, &#39;Customer#000001408&#39;, Decimal(&#39;731986.5933&#39;))
+(14836, &#39;Customer#000014836&#39;, Decimal(&#39;715083.0379&#39;))
+
+--- Output Contract ---
+
+Question:
+Top 10 customers by total revenue last quarter
+
+SQL used:
+WITH maxd AS (
+  SELECT MAX(o_orderdate) AS max_date FROM orders
+),
+bounds AS (
+  SELECT
+    (DATE_TRUNC(&#39;quarter&#39;, max_date) - INTERVAL &#39;3 months&#39;) AS start_prev_qtr,
+    (DATE_TRUNC(&#39;quarter&#39;, max_date) - INTERVAL &#39;1 day&#39;) AS end_prev_qtr
+  FROM maxd
+)
+SELECT
+  c.c_custkey,
+  c.c_name,
+  SUM(l.l_extendedprice * (1 - l.l_discount)) AS total_revenue
+FROM orders o
+JOIN bounds b ON TRUE
+JOIN customer c ON c.c_custkey = o.o_custkey
+JOIN lineitem l ON l.l_orderkey = o.o_orderkey
+WHERE o.o_orderdate &gt;= b.start_prev_qtr
+  AND o.o_orderdate &lt;= b.end_prev_qtr
+GROUP BY c.c_custkey, c.c_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+Assumptions:
+- Relative time is anchored to max(o_orderdate) in the dataset.
+- Revenue appears to be derived from line item extended price and discount.
+- Results are aggregated at customer level.
+- Output is intentionally limited to a subset of rows.
+
+Warnings:
+- None.
+
+Guardrails:
+{&#39;readonly_enforced&#39;: True, &#39;limit_info&#39;: {&#39;limit_added&#39;: False, &#39;limit_capped&#39;: False, &#39;final_limit&#39;: 10, &#39;reason&#39;: &#39;existing_limit&#39;}, &#39;timeout_seconds&#39;: 5, &#39;elapsed_seconds&#39;: 0.013}
+</code></pre><h2 id="final-thoughts">Final thoughts<a hidden class="anchor" aria-hidden="true" href="#final-thoughts">#</a></h2>
+<p>What started as a simple “can it write SQL?” experiment turned into something a bit more interesting. The model was never the problem. It was perfectly capable of producing plausible answers from the start. The difference between v0 and v4 wasn’t intelligence, it was constraint.</p>
+<p>At each step, the system became less “clever” and more grounded:</p>
+<ul>
+<li>first by forcing it to see the schema</li>
+<li>then by anchoring it to the data itself</li>
+<li>then by letting it react to failure</li>
+<li>and finally by putting guardrails around what it’s allowed to do</li>
+</ul>
+<p>That’s really the takeaway. Agents aren’t about autonomy, they’re about <strong>controlled behaviour under uncertainty</strong>. Left alone, they’re very good at being confidently wrong. With the right constraints, they become predictably useful.</p>
+<p>This little PoC isn’t a production system, and it’s not trying to be. But it does show where the real work is: not in getting an LLM to generate SQL, but in building the boundaries that make its output something you can actually trust.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://jamieallen1.github.io/">Jamie Allen</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
